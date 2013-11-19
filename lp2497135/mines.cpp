@@ -106,7 +106,7 @@ void Minesweeper::visFile(int p){
 *******************************************************************/
 int Minesweeper::setMines (){
 	if (opFi == true){
-		numMines = minFile(*x**y+3);
+		numMines = minFile(*x**y+4);
 		return numMines;
 	}
 	//initializes the private board to an array of zeros
@@ -163,9 +163,9 @@ int Minesweeper::setMines (){
 ** Description: Pulls data from the saved game file, taking the role
 **	of setMines. This function applies data to the hidden board.
 *******************************************************************/
-int Minesweeper::minFile (int w){
+float Minesweeper::minFile (int w){
 	//declare variables
-	int z;
+	float z;
 	fstream svGame;
 	//open file
 	svGame.open ("saved.txt", fstream::in | fstream::out);
@@ -175,7 +175,7 @@ int Minesweeper::minFile (int w){
 		exit(EXIT_FAILURE);
 	}
 	//move cursor to appropriate location in file
-	svGame >> z >> z >> z;
+	svGame >> z >> z >> z >> z;
 	for (int u = 0; u < *x**y; u++) svGame >> w;
 	//apply data to the hidden board
 	for (int i = 0; i < *x; i++){
@@ -194,10 +194,10 @@ int Minesweeper::minFile (int w){
 **	the user - checks for a mine at that point and updates the board
 **	when a mine is not hit.
 *******************************************************************/
-bool Minesweeper::upBoard (int a, int b){
+int Minesweeper::upBoard (int a, int b){
 	//declare variables
 	int g = 0;
-	bool ret = true;		//tells main whether the user has finished the game
+	int ret = 0;		//tells main whether the user has finished the game
 	
 	//checks if the coordinate chosen by the user is at a mine
 	if (priBoard[a**x +b] == 9) {
@@ -215,7 +215,7 @@ bool Minesweeper::upBoard (int a, int b){
 			cout << endl;
 		}
 		//game over
-		ret = false;
+		ret = 2;
 	}
 	//if the coordinate is not a mine, its value is made available to the user
 	else seeBoard[a**x + b] = priBoard [a**x +b];
@@ -270,9 +270,9 @@ bool Minesweeper::upBoard (int a, int b){
 	//if the user reaches only mines on the board
 	if ( g <= numMines ){
 		cout << "You won!" << endl;
-		ret = false;
+		ret = 1;
 	}
-	//return game completion status (if function reaches this point, game is incomplete)
+	//return game completion status
 	return ret;
 }
 /*******************************************************************
@@ -300,9 +300,14 @@ void Minesweeper::printBoard (){
 **	text file, allows user to return to a game after closing the 
 **	application.
 *******************************************************************/
-void Minesweeper::saveGame(){
+void Minesweeper::saveGame(float start){
 	//variables
 	fstream sveGme;
+
+	clock_t end = clock();
+	clock_t ticks = end - start;
+	float dur = ticks / (float) CLOCKS_PER_SEC;
+
 	//open file and remove any existing contents
 	sveGme.open ("saved.txt", fstream::out, fstream::trunc);
 	//confirm that file has opened properly
@@ -311,6 +316,7 @@ void Minesweeper::saveGame(){
 	}
 	//save board dimensions and the number of mines
 	sveGme << *x << " " << *y << " " << numMines << endl;
+	sveGme << dur << endl;
 	//save the board available to the user
 	for (int i = 0; i < *x; i++){
 		for (int j = 0; j < *y; j++){

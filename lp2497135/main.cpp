@@ -13,13 +13,16 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <iomanip>
 
 //Author's libraries
 #include "mines.h"
 
 //Function declarations
-void gamePly(int, int, int, bool);
-void getSave();
+float gamePly(int, int, int, bool, clock_t);
+float getSave();
+void setHiSc(float);
+void getHiSc();
 
 using namespace std;
 
@@ -33,7 +36,7 @@ int main(){
 	bool runAgain = true;
 	char saved[5];
 	int h = 0, v = 0, m = 0;
-
+	float time;
 	cout << "Welcome to Minesweeper.\n" << endl;
 	//Open saved game file
 	fstream svGame;
@@ -51,7 +54,7 @@ int main(){
 		cin >> saved;
 		if (saved[0] == 'y' || saved[0] == 'Y'){
 			//call function to get saved game
-			getSave();
+			time = getSave();
 		}
 	}
 
@@ -61,7 +64,7 @@ int main(){
 		int opt;
 
 		cout << "\nWould you like to set up your own board or use the preset size?" << endl
-			<< "Press '1' for preset, '2' to set up your own board, and '0' to quit." << endl;
+			<< "Press '1' for preset, '2' to set up your own board, '3' to view high scores, and '0' to quit." << endl;
 		cin >> opt;
 		do{
 			if (opt == 0){
@@ -82,6 +85,7 @@ int main(){
 				cout << "What percentage of the board would you like to be mines?" << endl << "(12-20% is a good range.)" << endl;
 				cin >> m;
 			}
+			if (opt == 3) getHiSc();
 			else if (opt == 1) {
 				//default board size
 				h = 10;
@@ -89,7 +93,8 @@ int main(){
 				m = 12;
 			}
 			//call gameplay function (where false indicates that a saved game is not being opened)
-			gamePly (h, v, m, false);
+			clock_t start = clock();
+			time = gamePly (h, v, m, false, start);
 		}while (s == false);
 	}
 	//execution ends here
@@ -103,10 +108,11 @@ int main(){
 **	interacts primarily with this function. User enters coordinates
 **	and has the option to save their game here.
 *******************************************************************/
-void gamePly(int h, int v, int m, bool oFile){
+float gamePly(int h, int v, int m, bool oFile, clock_t start){
 	//Declare variables
-	bool q = true;
+	int q = 0;
 	int a, b;
+	float duration = 300.0;
 	//Create and set up instance of class Minesweeper
 	Minesweeper defBoard(h+1,v+1,m,oFile);
 	int o = defBoard.setMines();		
@@ -119,7 +125,7 @@ void gamePly(int h, int v, int m, bool oFile){
 		cout <<"\nOops! Your percentage/board size combination was unsuccessful. There are no mines on this board!";
 	}
 	//while user has not hit a mine
-	while (q == true && o > 0) {
+	while (q == 0 && o > 0) {
 		//print the public board (board available to the user throughout gameplay)
 		defBoard.printBoard();
 		//get mine coordinate from user
@@ -129,27 +135,33 @@ void gamePly(int h, int v, int m, bool oFile){
 		//user quits and saves
 		if (a == -1){
 			//call function to save the game
-			defBoard.saveGame();
+			defBoard.saveGame(start);
 			cout << "\nThanks for playing!" << endl;
 			//head back to main
-			return;
+			return 300;
 		}
 		cout << "y: ";
 		cin >> b;
 		//user decides to quit at second part of coordinate, separated to make application more user-friendly
 		if (b == -1){
 			//call function to save game
-			defBoard.saveGame();
+			defBoard.saveGame(start);
 			cout << "\nThanks for playing!" << endl;
 			//head back to main
-			return;
+			return 300;
 		}
 		cout << endl;
 		//update board and check if user has hit a mine
 		q = defBoard.upBoard(b, a);
+		if ( q == 1 ){
+			clock_t end = clock();
+			clock_t ticks = end - start;
+			duration = ticks / (float) CLOCKS_PER_SEC;
+			setHiSc(duration);
+		}
 	}
 	//head back to main
-	return;
+	return duration;
 }
 /*******************************************************************
 ** Function: getSave
@@ -157,9 +169,10 @@ void gamePly(int h, int v, int m, bool oFile){
 **	variable of type Minesweeper and passes this data to the 
 **	gameplay function
 *******************************************************************/
-void getSave(){
+float getSave(){
 	//Declare variables
 	int h, v, m;
+	float t;
 	fstream svGame;
 	//Open save game file
 	svGame.open ("saved.txt", fstream::in);
@@ -170,10 +183,85 @@ void getSave(){
 	}
 	//Grab data
 	svGame >> h >> v >> m;
+	svGame >> t;
 	//Close file
 	svGame.close();
 	//Pass values to gameplay function ("true" indicates that data has been pulled from a file)
-	gamePly(h-1, v-1, m, true);
+	clock_t start = clock();
+	float duration = gamePly(h-1, v-1, m, true, start);
 	//Return to main
+	return duration+t;
+}
+void setHiSc(float time){
+	fstream hiSc;
+	float nxtLn;
+	float highs[10];
+	bool x = true;
+	int cond = 0;
+
+	hiSc.open ("hiScore.txt", fstream::in);
+	if (!hiSc.is_open()){
+		std::cout << "Error loading high scores file." << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	for (int i = 0; i < 10; i++){
+		hiSc >> nxtLn;
+		while (x == true){
+			if (time < nxtLn){
+				highs[i] = time;
+				cond = 1;
+				x = false;
+			}
+		}
+		cout << "test2";
+		cout << nxtLn;
+		if (cond = 0 && i < 10) 
+			highs[i] = nxtLn;
+		else if (cond = 1 && i < 9) 
+			highs[i+1] = nxtLn;
+		else break;
+	}
+	hiSc.close();
+
+	hiSc.open ("hiScore.txt", fstream::out, fstream::trunc);
+	if (!hiSc.is_open()){
+		std::cout << "Error loading high scores file." << endl;
+		exit(EXIT_FAILURE);
+	}
+	for (int a = 0; a < 10; a++){
+		hiSc << highs[a] << " ";
+	}
+	hiSc.close();
+	
+	if (cond = 1){
+		cout << "New high score!";
+		getHiSc();
+	}
+
+	return;
+}
+void getHiSc(){
+	char resp[4];
+	float high;
+	fstream scores;
+	scores.open ("hiScore.txt", fstream::in);
+	if (!scores.is_open()){
+		std::cout << "Error loading high scores file." << endl;
+		exit(EXIT_FAILURE);
+	}
+	cout << "Would you like to view your high scores?" << endl << "Please enter 'yes' or 'no'." << endl;
+	cin >> resp;
+	if (resp[0] == 'y'){
+		cout << "Best times (seconds):" << endl;
+		for (int i = 0; i < 10; i++){
+			scores >> high;
+			cout << setw(4);
+			cout << i+1 << ") " << high << endl;
+		}
+	}
+	else if (resp[0] != 'n') 
+		cout << "Invalid input.";
+	scores.close();
 	return;
 }
