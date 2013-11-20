@@ -64,7 +64,7 @@ int main(){
 		int opt;
 
 		cout << "\nWould you like to set up your own board or use the preset size?" << endl
-			<< "Press '1' for preset, '2' to set up your own board, '3' to view high scores, and '0' to quit." << endl;
+			<< "Press '1' for preset, '2' to set up your own board," << endl << "'3' to view high scores, and '0' to quit." << endl;
 		cin >> opt;
 		do{
 			if (opt == 0){
@@ -85,7 +85,10 @@ int main(){
 				cout << "What percentage of the board would you like to be mines?" << endl << "(12-20% is a good range.)" << endl;
 				cin >> m;
 			}
-			if (opt == 3) getHiSc();
+			if (opt == 3){
+				getHiSc();
+				break;
+			}
 			else if (opt == 1) {
 				//default board size
 				h = 10;
@@ -129,7 +132,9 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 		//print the public board (board available to the user throughout gameplay)
 		defBoard.printBoard();
 		//get mine coordinate from user
-		cout << "Pick a coordinate to check for a mine or enter -1 to quit and save your game." << endl;
+		cout << "Pick a coordinate to check for a mine" << endl
+			<< "enter 0 to add or remove a flag where a mine might be, " << endl
+			<< "or enter -1 to quit and save your game." << endl;
 		cout << "x: ";
 		cin >> a;
 		//user quits and saves
@@ -139,6 +144,11 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 			cout << "\nThanks for playing!" << endl;
 			//head back to main
 			return 300;
+		}
+		//go to flag functions and continue with next iteration of while loop
+		if (a == 0){
+			defBoard.flags();
+			continue;
 		}
 		cout << "y: ";
 		cin >> b;
@@ -150,9 +160,15 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 			//head back to main
 			return 300;
 		}
+		//flags & next while loop
+		if (b == 0){
+			defBoard.flags();
+			continue;
+		}
 		cout << endl;
 		//update board and check if user has hit a mine
 		q = defBoard.upBoard(b, a);
+		//game status: won, save possible high scores
 		if ( q == 1 ){
 			clock_t end = clock();
 			clock_t ticks = end - start;
@@ -186,82 +202,94 @@ float getSave(){
 	svGame >> t;
 	//Close file
 	svGame.close();
-	//Pass values to gameplay function ("true" indicates that data has been pulled from a file)
+	//start timer
 	clock_t start = clock();
+	//Pass values to gameplay function ("true" indicates that data has been pulled from a file)
 	float duration = gamePly(h-1, v-1, m, true, start);
-	//Return to main
+	//Return to main (current time plus time from saved game, if applicable)
 	return duration+t;
 }
+/*******************************************************************
+** Function: setHiSc
+** Description: Pulls high score data and compares user time to it
+**	before inserting updated data back into a save file.
+*******************************************************************/
 void setHiSc(float time){
+	//variables
 	fstream hiSc;
 	float nxtLn;
 	float highs[10];
 	bool x = true;
-	int cond = 0;
-
+	int cond = 0;	//default condition
+	//open high score file and confirm that it opened properly
 	hiSc.open ("hiScore.txt", fstream::in);
 	if (!hiSc.is_open()){
 		std::cout << "Error loading high scores file." << endl;
 		exit(EXIT_FAILURE);
 	}
-
+	//pull high score data and add new data, if applicable - array is kept to 10 spaces to minimize high score data
 	for (int i = 0; i < 10; i++){
 		hiSc >> nxtLn;
-		while (x == true){
-			if (time < nxtLn){
-				highs[i] = time;
-				cond = 1;
-				x = false;
-			}
+		//x is true while saved times are better than user's newest score 
+		if (x == true && time < nxtLn){
+			highs[i] = time;
+			cond = 1;
+			x = false;
 		}
-		cout << "test2";
-		cout << nxtLn;
+		//if no new data is added
 		if (cond = 0 && i < 10) 
 			highs[i] = nxtLn;
+		//if new data is added i is incremented further to fit new data
 		else if (cond = 1 && i < 9) 
 			highs[i+1] = nxtLn;
 		else break;
 	}
+	//close file
 	hiSc.close();
-
+	//reopen file for output and delete its contents
 	hiSc.open ("hiScore.txt", fstream::out, fstream::trunc);
+	//confirm proper opening
 	if (!hiSc.is_open()){
 		std::cout << "Error loading high scores file." << endl;
 		exit(EXIT_FAILURE);
 	}
+	//insert updated high score array into file
 	for (int a = 0; a < 10; a++){
 		hiSc << highs[a] << " ";
 	}
+	//close file
 	hiSc.close();
-	
+
 	if (cond = 1){
 		cout << "New high score!";
 		getHiSc();
 	}
-
 	return;
 }
+/*******************************************************************
+** Function: getHiSc
+** Description: Pulls high score data and prints it
+*******************************************************************/
 void getHiSc(){
+	//variables
 	char resp[4];
 	float high;
 	fstream scores;
+	//open file
 	scores.open ("hiScore.txt", fstream::in);
+	//confirm file opening
 	if (!scores.is_open()){
 		std::cout << "Error loading high scores file." << endl;
 		exit(EXIT_FAILURE);
 	}
-	cout << "Would you like to view your high scores?" << endl << "Please enter 'yes' or 'no'." << endl;
-	cin >> resp;
-	if (resp[0] == 'y'){
-		cout << "Best times (seconds):" << endl;
-		for (int i = 0; i < 10; i++){
-			scores >> high;
-			cout << setw(4);
-			cout << i+1 << ") " << high << endl;
-		}
+	//display high scores
+	cout << "Best times (seconds):" << endl;
+	for (int i = 0; i < 10; i++){
+		scores >> high;
+		cout << setw(4);
+		cout << i+1 << ") " << high << endl;
 	}
-	else if (resp[0] != 'n') 
-		cout << "Invalid input.";
+	//close file
 	scores.close();
 	return;
 }

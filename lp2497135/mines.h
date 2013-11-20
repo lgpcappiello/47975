@@ -12,6 +12,8 @@ private:
 	void showMines();
 	void visFile(int);
 	float minFile(int);
+	void flagMin(int, int);
+	void remFlag(int, int);
 
 public:
 //initialize constructor, copy constructor, and destructor
@@ -21,7 +23,8 @@ public:
 //initialize functions called by main
 	void setVis();
 	int setMines();
-	int upBoard (int, int);
+	int upBoard(int, int);
+	void flags();
 	void printBoard();
 	void contGame();
 	void saveGame(float);

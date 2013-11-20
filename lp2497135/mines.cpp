@@ -80,6 +80,7 @@ void Minesweeper::setVis(){
 void Minesweeper::visFile(int p){
 	//open file
 	fstream svGame;
+	float q;
 	//confirm that file opened properly
 	svGame.open ("saved.txt", fstream::in | fstream::out);
 	if (!svGame.is_open()){
@@ -88,6 +89,7 @@ void Minesweeper::visFile(int p){
 	}
 	//move cursor past first three integers
 	svGame >> p >> p >> p;
+	svGame >> q;
 	//copy appropriate file data to seeBoard
 	for (int i = 0; i < *x; i++){
 		for (int j = 0; j < *y; j++){
@@ -107,6 +109,8 @@ void Minesweeper::visFile(int p){
 int Minesweeper::setMines (){
 	if (opFi == true){
 		numMines = minFile(*x**y+4);
+		cout << numMines;
+		cin.get();
 		return numMines;
 	}
 	//initializes the private board to an array of zeros
@@ -136,23 +140,32 @@ int Minesweeper::setMines (){
 		for (int j = 0; j < *y; j++){
 			/* The following section of code checks each coordinate on the board for
 			** a mine and increments the positions around each mine*/
+
 			if (priBoard [i**x + j] == 9){
-				if (priBoard [(i+1)**x + (j+1)] >= 0 && priBoard [(i+1)**x + (j+1)] < 9)
+				if (priBoard [(i+1)**x + (j+1)] >= 0 && priBoard [(i+1)**x + (j+1)] < 9){
 					++priBoard [(i+1)**x + (j+1)];		//1
-				if (priBoard [(i+1)**x + j] >= 0 && priBoard [(i+1)**x + j] < 9) 
+				}
+				if (priBoard [(i+1)**x + j] >= 0 && priBoard [(i+1)**x + j] < 9){
 					++priBoard [(i+1)**x + j];			//2
-				if (priBoard [i**x + (j+1)] >= 0 && priBoard [i**x + (j+1)] < 9)
+				}
+				if (priBoard [i**x + (j+1)] >= 0 && priBoard [i**x + (j+1)] < 9){
 					++priBoard [i**x + (j+1)];			//3
-				if (priBoard [(i+1)**x + (j-1)] >= 0 && priBoard [(i+1)**x + (j-1)] < 9)
+				}
+				if (priBoard [(i+1)**x + (j-1)] >= 0 && priBoard [(i+1)**x + (j-1)] < 9){
 					++priBoard [(i+1)**x + (j-1)];		//4
-				if (priBoard [(i-1)**x + (j+1)] >= 0 && priBoard [(i-1)**x + (j+1)] < 9)
+				}
+				if (priBoard [(i-1)**x + (j+1)] >= 0 && priBoard [(i-1)**x + (j+1)] < 9){
 					++priBoard [(i-1)**x + (j+1)];		//5
-				if (priBoard [(i-1)**x + (j-1)] >= 0 && priBoard [(i-1)**x + (j-1)] < 9)
+				}
+				if (priBoard [(i-1)**x + (j-1)] >= 0 && priBoard [(i-1)**x + (j-1)] < 9){
 					++priBoard [(i-1)**x + (j-1)];		//6
-				if (priBoard [(i-1)**x + j] >= 0 && priBoard [(i-1)**x + j] < 9)
+				}
+				if (priBoard [(i-1)**x + j] >= 0 && priBoard [(i-1)**x + j] < 9){
 					++priBoard [(i-1)**x + j];			//7
-				if (priBoard [i**x + (j-1)] >= 0 && priBoard [i**x + (j-1)] < 9)
+				}
+				if (priBoard [i**x + (j-1)] >= 0 && priBoard [i**x + (j-1)] < 9){
 					++priBoard [i**x + (j-1)];			//8
+				}
 			}
 		}
 	}	
@@ -165,7 +178,8 @@ int Minesweeper::setMines (){
 *******************************************************************/
 float Minesweeper::minFile (int w){
 	//declare variables
-	float z;
+	int z;
+	float q;
 	fstream svGame;
 	//open file
 	svGame.open ("saved.txt", fstream::in | fstream::out);
@@ -175,7 +189,8 @@ float Minesweeper::minFile (int w){
 		exit(EXIT_FAILURE);
 	}
 	//move cursor to appropriate location in file
-	svGame >> z >> z >> z >> z;
+	svGame >> z >> z >> z;
+	svGame >> q;
 	for (int u = 0; u < *x**y; u++) svGame >> w;
 	//apply data to the hidden board
 	for (int i = 0; i < *x; i++){
@@ -228,6 +243,7 @@ int Minesweeper::upBoard (int a, int b){
 	** that it can update all of the spaces around that coordinate not covered in the first loop. 
 	** As there are 8 spaces around any inter-board coordinate, and each one is accounted for and 
 	** noted below*/
+
 	if (seeBoard[a**x + b] == 0){
 		for (int k = a; k < *x; k++){
 			for (int l = b; l < *y; l++){
@@ -276,6 +292,63 @@ int Minesweeper::upBoard (int a, int b){
 	return ret;
 }
 /*******************************************************************
+** Function: flags
+** Description: Allows user to choose whether they want to add or
+**	remove a flag - gets this code out of main
+*******************************************************************/
+void Minesweeper::flags(){
+	//variables
+	int flag, x, y;
+	cout << "Would you like to (1) add or (2) remove a flag?" << endl;
+	cin >> flag;
+	//get coordinates and pass to appropriate funtion
+	if (flag == 1){
+		cout << "Please enter a coordinates you wish to flag." << endl;
+		cout << "x: ";
+		cin >> x;
+		cout << "y: ";
+		cin >> y;
+		flagMin(y,x);
+	}
+	else if (flag == 2){
+		cout << "Please enter the coordinates of a flag you wish to remove." << endl;
+		cout << "x: ";
+		cin >> x;
+		cout << "y: ";
+		cin >> y;
+		remFlag(y,x);
+	}
+	return;
+}
+
+/*******************************************************************
+** Function: flagMin
+** Description: Allows the user to flag a space on the board as a
+**	mine. 
+*******************************************************************/
+void Minesweeper::flagMin(int a, int b){
+	//Check that space hasn't already been touched by user
+	if (seeBoard[a**x+b] == -1){
+		seeBoard[a**x+b] = 42;		//42 represents a flag
+	}
+	else
+		cout << "Invalid input: this space has already been cleared." << endl;
+	return;
+}
+/*******************************************************************
+** Function: remFlag
+** Description: Removes a user-added flag from the board
+*******************************************************************/
+void Minesweeper::remFlag(int a, int b){
+	//confirm that there is actually a flag at the given coordinate
+	if (seeBoard[a**x+b] == 42){
+		seeBoard[a**x+b] = -1;		//-1 represents untouched coordinate
+	}
+	else
+		cout << "Invalid input: this space does not contain a flag." << endl;
+	return;
+}
+/*******************************************************************
 ** Function: printBoard
 ** Description: Prints the board that the user sees throughout the
 **	game. 
@@ -288,6 +361,7 @@ void Minesweeper::printBoard (){
 			//values not yet available to the user have been initialized to -1,
 			//but the user sees these spaces as '.'
 			if (seeBoard[t**x + w] == -1) cout << ".";
+			else if (seeBoard[t**x + w] == 42) cout << "F";
 			else cout << seeBoard[t**x + w];
 		}
 		cout << endl;
