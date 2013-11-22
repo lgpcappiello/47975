@@ -19,10 +19,13 @@
 #include "mines.h"
 
 //Function declarations
-float gamePly(int, int, int, bool, clock_t);
+float gamePly(int, int, int, int, int, bool, clock_t);
+float openSv();
 float getSave();
 void setHiSc(float);
 void getHiSc();
+clock_t begClck();
+float endClck(clock_t);
 
 using namespace std;
 
@@ -34,35 +37,14 @@ int main(){
 	srand(static_cast<unsigned int>(time(0)));	
 	//Declare variables
 	bool runAgain = true;
-	char saved[5];
 	int h = 0, v = 0, m = 0;
 	float time;
 	cout << "Welcome to Minesweeper.\n" << endl;
-	//Open saved game file
-	fstream svGame;
-	svGame.open ("saved.txt", fstream::in | fstream::out);
-	//Confirm file opened successfully
-	if (!svGame.is_open()){
-		std::cout << "Error loading save game file. Continued gameplay will not be saved." << endl;
-	}
-	svGame.seekg(0,ios::end);	//get final character in file
-	int emt = svGame.tellg();	//save final character
-	svGame.close();				//close file
-	//if the file has data in it
-	if (emt != 0){
-		cout << "Would you like to continue your last saved game?" << "\nPlease enter 'yes' or 'no'." << endl;
-		cin >> saved;
-		if (saved[0] == 'y' || saved[0] == 'Y'){
-			//call function to get saved game
-			time = getSave();
-		}
-	}
-
+	time = openSv();
 	while (runAgain == true) {
 		//variables declared
 		bool s = true;
 		int opt;
-
 		cout << "\nWould you like to set up your own board or use the preset size?" << endl
 			<< "Press '1' for preset, '2' to set up your own board," << endl << "'3' to view high scores, and '0' to quit." << endl;
 		cin >> opt;
@@ -96,8 +78,8 @@ int main(){
 				m = 12;
 			}
 			//call gameplay function (where false indicates that a saved game is not being opened)
-			clock_t start = clock();
-			time = gamePly (h, v, m, false, start);
+			clock_t start = begClck();
+			time = gamePly (h, v, m, 0, 0, false, start);
 		}while (s == false);
 	}
 	//execution ends here
@@ -111,13 +93,13 @@ int main(){
 **	interacts primarily with this function. User enters coordinates
 **	and has the option to save their game here.
 *******************************************************************/
-float gamePly(int h, int v, int m, bool oFile, clock_t start){
+float gamePly(int h, int v, int m, int f, int tot, bool oFile, clock_t start){
 	//Declare variables
 	int q = 0;
 	int a, b;
 	float duration = 300.0;
 	//Create and set up instance of class Minesweeper
-	Minesweeper defBoard(h+1,v+1,m,oFile);
+	Minesweeper defBoard(h+1,v+1,m,f,tot,oFile);
 	int o = defBoard.setMines();		
 	defBoard.setVis();
 	//Check that the board actually has mines on it
@@ -133,7 +115,7 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 		defBoard.printBoard();
 		//get mine coordinate from user
 		cout << "Pick a coordinate to check for a mine" << endl
-			<< "enter 0 to add or remove a flag where a mine might be, " << endl
+			<< "enter 0 to flag or unflag a mine, " << endl
 			<< "or enter -1 to quit and save your game." << endl;
 		cout << "x: ";
 		cin >> a;
@@ -162,7 +144,10 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 		}
 		//flags & next while loop
 		if (b == 0){
-			defBoard.flags();
+			q = defBoard.flags();
+			if ( q == 1 ){
+				duration = endClck(start);
+			}
 			continue;
 		}
 		cout << endl;
@@ -170,14 +155,35 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 		q = defBoard.upBoard(b, a);
 		//game status: won, save possible high scores
 		if ( q == 1 ){
-			clock_t end = clock();
-			clock_t ticks = end - start;
-			duration = ticks / (float) CLOCKS_PER_SEC;
-			setHiSc(duration);
+			duration = endClck(start);
 		}
 	}
 	//head back to main
 	return duration;
+}
+float openSv(){
+	char saved[5];
+	float time = 0;
+	//Open saved game file
+	fstream svGame;
+	svGame.open ("saved.txt", fstream::in | fstream::out);
+	//Confirm file opened successfully
+	if (!svGame.is_open()){
+		std::cout << "Error loading save game file. Continued gameplay will not be saved." << endl;
+	}
+	svGame.seekg(0,ios::end);	//get final character in file
+	int emt = svGame.tellg();	//save final character
+	svGame.close();				//close file
+	//if the file has data in it
+	if (emt != 0){
+		cout << "Would you like to continue your last saved game?" << "\nPlease enter 'yes' or 'no'." << endl;
+		cin >> saved;
+		if (saved[0] == 'y' || saved[0] == 'Y'){
+			//call function to get saved game
+			time = getSave();
+		}
+	}
+	return time;
 }
 /*******************************************************************
 ** Function: getSave
@@ -187,7 +193,7 @@ float gamePly(int h, int v, int m, bool oFile, clock_t start){
 *******************************************************************/
 float getSave(){
 	//Declare variables
-	int h, v, m;
+	int h, v, m, f, tot;
 	float t;
 	fstream svGame;
 	//Open save game file
@@ -198,14 +204,14 @@ float getSave(){
 		exit(EXIT_FAILURE);
 	}
 	//Grab data
-	svGame >> h >> v >> m;
+	svGame >> h >> v >> m >> f >> tot;
 	svGame >> t;
 	//Close file
 	svGame.close();
 	//start timer
-	clock_t start = clock();
+	clock_t start = begClck();
 	//Pass values to gameplay function ("true" indicates that data has been pulled from a file)
-	float duration = gamePly(h-1, v-1, m, true, start);
+	float duration = gamePly(h-1, v-1, m, f, tot, true, start);
 	//Return to main (current time plus time from saved game, if applicable)
 	return duration+t;
 }
@@ -272,7 +278,6 @@ void setHiSc(float time){
 *******************************************************************/
 void getHiSc(){
 	//variables
-	char resp[4];
 	float high;
 	fstream scores;
 	//open file
@@ -292,4 +297,23 @@ void getHiSc(){
 	//close file
 	scores.close();
 	return;
+}
+/*******************************************************************
+** Function: begClck
+** Description: Starts clock time
+*******************************************************************/
+clock_t begClck(){
+	clock_t start = clock();
+	return start;
+}
+/*******************************************************************
+** Function: endClck
+** Description: Stops clock time and returns uesr time data
+*******************************************************************/
+float endClck(clock_t start){
+	clock_t end = clock();
+	clock_t ticks = end - start;
+	float duration = ticks / (float) CLOCKS_PER_SEC;
+	setHiSc(duration);
+	return duration;
 }

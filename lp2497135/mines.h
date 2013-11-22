@@ -12,19 +12,21 @@ private:
 	void showMines();
 	void visFile(int);
 	float minFile(int);
-	void flagMin(int, int);
+	int flagged;
+	int totFl;
+	int flagMin(int, int);
 	void remFlag(int, int);
 
 public:
 //initialize constructor, copy constructor, and destructor
-	Minesweeper (int, int, int, bool);
+	Minesweeper (int, int, int, int, int, bool);
 	Minesweeper (const Minesweeper &obj);
 	~Minesweeper();
 //initialize functions called by main
 	void setVis();
 	int setMines();
 	int upBoard(int, int);
-	void flags();
+	int flags();
 	void printBoard();
 	void contGame();
 	void saveGame(float);

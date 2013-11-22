@@ -15,13 +15,15 @@ using namespace std;
 ** Description: Takes in values for x, y, and p and applies those to
 **	priBoard and seeBoard
 *******************************************************************/
-Minesweeper::Minesweeper(int a, int b, int f, bool oFile){
+Minesweeper::Minesweeper(int a, int b, int g, int f, int t, bool oFile){
 	x = new int;
 	*x = a;
 	y = new int;
 	*y = b;
-	p = f;
+	p = g;
 	opFi = oFile;
+	flagged = f;
+	totFl = t;
 	//one dimensional arrays initialized and treated as 2-D arrays
     priBoard = new int[a*b];
 	seeBoard = new int[a*b];
@@ -87,8 +89,8 @@ void Minesweeper::visFile(int p){
 		std::cout << "Error loading save game file." << endl;
 		exit(EXIT_FAILURE);
 	}
-	//move cursor past first three integers
-	svGame >> p >> p >> p;
+	//move cursor past first five data points
+	svGame >> p >> p >> p >> p >> p;
 	svGame >> q;
 	//copy appropriate file data to seeBoard
 	for (int i = 0; i < *x; i++){
@@ -108,9 +110,7 @@ void Minesweeper::visFile(int p){
 *******************************************************************/
 int Minesweeper::setMines (){
 	if (opFi == true){
-		numMines = minFile(*x**y+4);
-		cout << numMines;
-		cin.get();
+		numMines = minFile(*x**y+5);
 		return numMines;
 	}
 	//initializes the private board to an array of zeros
@@ -179,6 +179,7 @@ int Minesweeper::setMines (){
 float Minesweeper::minFile (int w){
 	//declare variables
 	int z;
+	int r;
 	float q;
 	fstream svGame;
 	//open file
@@ -190,6 +191,7 @@ float Minesweeper::minFile (int w){
 	}
 	//move cursor to appropriate location in file
 	svGame >> z >> z >> z;
+	svGame >> r >> r;
 	svGame >> q;
 	for (int u = 0; u < *x**y; u++) svGame >> w;
 	//apply data to the hidden board
@@ -296,19 +298,20 @@ int Minesweeper::upBoard (int a, int b){
 ** Description: Allows user to choose whether they want to add or
 **	remove a flag - gets this code out of main
 *******************************************************************/
-void Minesweeper::flags(){
+int Minesweeper::flags(){
 	//variables
 	int flag, x, y;
+	int st = 0;
 	cout << "Would you like to (1) add or (2) remove a flag?" << endl;
 	cin >> flag;
 	//get coordinates and pass to appropriate funtion
 	if (flag == 1){
-		cout << "Please enter a coordinates you wish to flag." << endl;
+		cout << "Please enter a coordinate you wish to flag." << endl;
 		cout << "x: ";
 		cin >> x;
 		cout << "y: ";
 		cin >> y;
-		flagMin(y,x);
+		int st = flagMin(y,x);
 	}
 	else if (flag == 2){
 		cout << "Please enter the coordinates of a flag you wish to remove." << endl;
@@ -318,7 +321,7 @@ void Minesweeper::flags(){
 		cin >> y;
 		remFlag(y,x);
 	}
-	return;
+	return st;
 }
 
 /*******************************************************************
@@ -326,14 +329,23 @@ void Minesweeper::flags(){
 ** Description: Allows the user to flag a space on the board as a
 **	mine. 
 *******************************************************************/
-void Minesweeper::flagMin(int a, int b){
+int Minesweeper::flagMin(int a, int b){
+	int gamSt = 0;
 	//Check that space hasn't already been touched by user
 	if (seeBoard[a**x+b] == -1){
 		seeBoard[a**x+b] = 42;		//42 represents a flag
+		++totFl;
+		if (priBoard[a**x+b] == 9){
+			++flagged;
+			if (totFl == flagged && flagged == numMines){
+				cout << "All the mines have been flagged. You won!";
+				gamSt = true;
+			}
+		}
 	}
 	else
 		cout << "Invalid input: this space has already been cleared." << endl;
-	return;
+	return gamSt;
 }
 /*******************************************************************
 ** Function: remFlag
@@ -343,6 +355,10 @@ void Minesweeper::remFlag(int a, int b){
 	//confirm that there is actually a flag at the given coordinate
 	if (seeBoard[a**x+b] == 42){
 		seeBoard[a**x+b] = -1;		//-1 represents untouched coordinate
+		--totFl;
+		if (priBoard[a**x+b] == 9){
+			--flagged;
+		}
 	}
 	else
 		cout << "Invalid input: this space does not contain a flag." << endl;
