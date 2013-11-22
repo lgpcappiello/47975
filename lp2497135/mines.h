@@ -12,10 +12,12 @@ private:
 	void showMines();
 	void visFile(int);
 	float minFile(int);
-	int flagged;
+	int marked;
 	int totFl;
-	int flagMin(int, int);
+	void flagMin(int, int);
 	void remFlag(int, int);
+	int markMin(int, int);
+	void remMark(int, int);
 
 public:
 //initialize constructor, copy constructor, and destructor

@@ -19,7 +19,7 @@
 #include "mines.h"
 
 //Function declarations
-float gamePly(int, int, int, int, int, bool, clock_t);
+float gamePly(int, int, int, bool, clock_t);
 float openSv();
 float getSave();
 void setHiSc(float);
@@ -37,23 +37,26 @@ int main(){
 	srand(static_cast<unsigned int>(time(0)));	
 	//Declare variables
 	bool runAgain = true;
-	int h = 0, v = 0, m = 0;
+	int h = 0, v = 0, m = 0;	//horizontal, vertical, mines
 	float time;
+
 	cout << "Welcome to Minesweeper.\n" << endl;
 	time = openSv();
 	while (runAgain == true) {
-		//variables declared
+		//more variables
 		bool s = true;
 		int opt;
 		cout << "\nWould you like to set up your own board or use the preset size?" << endl
 			<< "Press '1' for preset, '2' to set up your own board," << endl << "'3' to view high scores, and '0' to quit." << endl;
 		cin >> opt;
 		do{
+			//quit
 			if (opt == 0){
 				runAgain = false;
 				cout << "\nThanks for playing!" << endl;
 				return 0;
 			}
+			//customize board
 			if (opt == 2){
 				cout << "What would you like the size of your board to be?" << endl << "(Sizes range from 5-25.)" << endl;
 				cin >> v;
@@ -67,24 +70,26 @@ int main(){
 				cout << "What percentage of the board would you like to be mines?" << endl << "(12-20% is a good range.)" << endl;
 				cin >> m;
 			}
+			//view high scores
 			if (opt == 3){
 				getHiSc();
 				break;
 			}
+			//use default board (default sizes)
 			else if (opt == 1) {
-				//default board size
 				h = 10;
 				v = 10;
 				m = 12;
 			}
-			//call gameplay function (where false indicates that a saved game is not being opened)
+			//start timer
 			clock_t start = begClck();
-			time = gamePly (h, v, m, 0, 0, false, start);
+			//call gameplay function (where false indicates that a saved game is not being opened)
+			time = gamePly (h, v, m, false, start);
 		}while (s == false);
 	}
-	//execution ends here
 	cin.ignore();
 	cin.get();
+	//execution ends here
 	return 0;
 }
 /*******************************************************************
@@ -93,16 +98,16 @@ int main(){
 **	interacts primarily with this function. User enters coordinates
 **	and has the option to save their game here.
 *******************************************************************/
-float gamePly(int h, int v, int m, int f, int tot, bool oFile, clock_t start){
+float gamePly(int h, int v, int m, bool oFile, clock_t start){
 	//Declare variables
 	int q = 0;
 	int a, b;
 	float duration = 300.0;
 	//Create and set up instance of class Minesweeper
-	Minesweeper defBoard(h+1,v+1,m,f,tot,oFile);
+	Minesweeper defBoard(h+1,v+1,m,oFile);
 	int o = defBoard.setMines();		
 	defBoard.setVis();
-	//Check that the board actually has mines on it
+	//Check that the board actually has mines on it and display how many
 	if (o != 0){
 		cout << "\nThere are " << o << " mines on the board. Try to find them all!\n" << endl;
 	}
@@ -115,45 +120,45 @@ float gamePly(int h, int v, int m, int f, int tot, bool oFile, clock_t start){
 		defBoard.printBoard();
 		//get mine coordinate from user
 		cout << "Pick a coordinate to check for a mine" << endl
-			<< "enter 0 to flag or unflag a mine, " << endl
-			<< "or enter -1 to quit and save your game." << endl;
+			<< "enter 0 to (un)flag or (un)mark a potential mine " << endl
+			<< "enter -1 to quit and save your game," << endl
+			<< "enter -2 to quit without saving." << endl;
 		cout << "x: ";
 		cin >> a;
-		//user quits and saves
-		if (a == -1){
-			//call function to save the game
-			defBoard.saveGame(start);
+		//user quits game
+		if (a == -1 || a == -2){
+			//quit with save
+			if (a == -1) defBoard.saveGame(start);
 			cout << "\nThanks for playing!" << endl;
 			//head back to main
 			return 300;
 		}
 		//go to flag functions and continue with next iteration of while loop
 		if (a == 0){
-			defBoard.flags();
+			defBoard.flgORmrk();
+			//head to next iteration of loop
 			continue;
 		}
 		cout << "y: ";
 		cin >> b;
 		//user decides to quit at second part of coordinate, separated to make application more user-friendly
-		if (b == -1){
-			//call function to save game
-			defBoard.saveGame(start);
+		if (b == -1 || b == -2){
+			//quit with save
+			if (b == -1) defBoard.saveGame(start);
 			cout << "\nThanks for playing!" << endl;
 			//head back to main
 			return 300;
 		}
-		//flags & next while loop
+		//flag functions
 		if (b == 0){
-			q = defBoard.flags();
-			if ( q == 1 ){
-				duration = endClck(start);
-			}
+			defBoard.flgORmrk+();
+			//head to next iteration of loop
 			continue;
 		}
 		cout << endl;
 		//update board and check if user has hit a mine
 		q = defBoard.upBoard(b, a);
-		//game status: won, save possible high scores
+		//game status: won
 		if ( q == 1 ){
 			duration = endClck(start);
 		}
@@ -167,7 +172,7 @@ float openSv(){
 	//Open saved game file
 	fstream svGame;
 	svGame.open ("saved.txt", fstream::in | fstream::out);
-	//Confirm file opened successfully
+	//Confirm file open
 	if (!svGame.is_open()){
 		std::cout << "Error loading save game file. Continued gameplay will not be saved." << endl;
 	}
@@ -183,6 +188,7 @@ float openSv(){
 			time = getSave();
 		}
 	}
+	//send current time data back
 	return time;
 }
 /*******************************************************************
@@ -193,26 +199,26 @@ float openSv(){
 *******************************************************************/
 float getSave(){
 	//Declare variables
-	int h, v, m, f, tot;
+	int h, v, m;
 	float t;
 	fstream svGame;
 	//Open save game file
 	svGame.open ("saved.txt", fstream::in);
-	//Confirm that file has opened properly
+	//Confirm file open
 	if (!svGame.is_open()){
 		std::cout << "Error loading save game file." << endl;
 		exit(EXIT_FAILURE);
 	}
 	//Grab data
-	svGame >> h >> v >> m >> f >> tot;
+	svGame >> h >> v >> m;
 	svGame >> t;
 	//Close file
 	svGame.close();
 	//start timer
 	clock_t start = begClck();
 	//Pass values to gameplay function ("true" indicates that data has been pulled from a file)
-	float duration = gamePly(h-1, v-1, m, f, tot, true, start);
-	//Return to main (current time plus time from saved game, if applicable)
+	float duration = gamePly(h-1, v-1, m, true, start);
+	//Return current time plus time from saved game, if applicable, to main
 	return duration+t;
 }
 /*******************************************************************
@@ -227,16 +233,17 @@ void setHiSc(float time){
 	float highs[10];
 	bool x = true;
 	int cond = 0;	//default condition
-	//open high score file and confirm that it opened properly
+	//open high score file and confirm file open
 	hiSc.open ("hiScore.txt", fstream::in);
 	if (!hiSc.is_open()){
 		std::cout << "Error loading high scores file." << endl;
 		exit(EXIT_FAILURE);
 	}
-	//pull high score data and add new data, if applicable - array is kept to 10 spaces to minimize high score data
+	//pull high score data and add new data, if applicable
+	//array is kept to 10 spaces to minimize number of scores saved
 	for (int i = 0; i < 10; i++){
 		hiSc >> nxtLn;
-		//x is true while saved times are better than user's newest score 
+		//x is true while saved times are better (lower) than user's newest score 
 		if (x == true && time < nxtLn){
 			highs[i] = time;
 			cond = 1;
@@ -245,16 +252,16 @@ void setHiSc(float time){
 		//if no new data is added
 		if (cond = 0 && i < 10) 
 			highs[i] = nxtLn;
-		//if new data is added i is incremented further to fit new data
+		//if new data is added, i is incremented to fit new data
 		else if (cond = 1 && i < 9) 
 			highs[i+1] = nxtLn;
 		else break;
 	}
 	//close file
 	hiSc.close();
-	//reopen file for output and delete its contents
+	//reopen file for output and delete current contents
 	hiSc.open ("hiScore.txt", fstream::out, fstream::trunc);
-	//confirm proper opening
+	//confirm open
 	if (!hiSc.is_open()){
 		std::cout << "Error loading high scores file." << endl;
 		exit(EXIT_FAILURE);
@@ -265,7 +272,7 @@ void setHiSc(float time){
 	}
 	//close file
 	hiSc.close();
-
+	//new data added
 	if (cond = 1){
 		cout << "New high score!";
 		getHiSc();
@@ -303,6 +310,7 @@ void getHiSc(){
 ** Description: Starts clock time
 *******************************************************************/
 clock_t begClck(){
+	//start timer
 	clock_t start = clock();
 	return start;
 }
@@ -311,9 +319,13 @@ clock_t begClck(){
 ** Description: Stops clock time and returns uesr time data
 *******************************************************************/
 float endClck(clock_t start){
+	//end timer
 	clock_t end = clock();
+	//calculate total time
 	clock_t ticks = end - start;
+	//convert to seconds
 	float duration = ticks / (float) CLOCKS_PER_SEC;
+	//send data to high score function and return
 	setHiSc(duration);
 	return duration;
 }
