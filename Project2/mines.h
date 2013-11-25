@@ -5,33 +5,38 @@
 class Minesweeper {
 //initialize private variables and functions called only by member functions
 private:
-	int *x, *y, p, numMines;
+	int x, y;
+	int p;
+	int numMines; 
+	int goodMrk;
 	bool opFi;
 	int *priBoard;
 	int *seeBoard;
 	void showMines();
-	void visFile(int);
-	float minFile(int);
-	int marked;
-	int totFl;
+	void visFile();
+	int minFile();
+	void flags();
+	void marks();
 	void flagMin(int, int);
 	void remFlag(int, int);
-	int markMin(int, int);
+	void markMin(int, int);
 	void remMark(int, int);
 
 public:
 //initialize constructor, copy constructor, and destructor
-	Minesweeper (int, int, int, int, int, bool);
+	Minesweeper (int, int, int, int, bool);
 	Minesweeper (const Minesweeper &obj);
 	~Minesweeper();
 //initialize functions called by main
 	void setVis();
-	int setMines();
+	void setMines();
+	int getX(int);
+	int getY();
 	int upBoard(int, int);
-	int flags();
+	void flgORmrk();
 	void printBoard();
 	void contGame();
-	void saveGame(float);
+	void saveGame(clock_t);
 };
 
 #endif
