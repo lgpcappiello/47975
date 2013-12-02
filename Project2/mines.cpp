@@ -5,6 +5,7 @@
 
 //Author's libraries
 #include "mines.h"
+#include "saved.h"
 
 using namespace std;
 
@@ -43,6 +44,41 @@ Minesweeper::Minesweeper(const Minesweeper &obj){
 Minesweeper::~Minesweeper(){
 	delete [] priBoard;
 	delete [] seeBoard;
+}
+/*******************************************************************
+** Function: getPri
+** Description: Returns a pointer to the private board
+*******************************************************************/
+int* Minesweeper::getPri(){
+	return priBoard;
+}
+/*******************************************************************
+** Function: getPub
+** Description: Returns a pointer to the public board
+*******************************************************************/
+int* Minesweeper::getPub(){
+	return seeBoard;
+}
+/*******************************************************************
+** Function: getDim
+** Description: Returns board dimensions (x=y)
+*******************************************************************/
+int Minesweeper::getDim(){
+	return x;
+}
+/*******************************************************************
+** Function: getNum
+** Description: Returns number of mines
+*******************************************************************/
+int Minesweeper::getNum(){
+	return numMines;
+}
+/*******************************************************************
+** Function: getMrk
+** Description: Returns number of correct marks
+*******************************************************************/
+int Minesweeper::getMrk(){
+	return goodMrk;
 }
 /*******************************************************************
 ** Function: setVis
@@ -296,7 +332,7 @@ int Minesweeper::upBoard (int a, int b){
 	else seeBoard[a*x + b] = priBoard [a*x +b];
 
 	/* If the coordinate's value is zero, the spaces are filled in around it until it reaches 
-	** nonzero values (located adjacent to mines). The code moves from left to right and down the 
+	** nonzero values (located adjacent to mines). The code moves from left to right and down the 1
 	** rows from the coordinate entered by the user until it reaches a zero. It then updates all 
 	** of the relevant spaces past the new zero on the board. The second loop starts checking for 
 	** zeros at the coordinate entered by the user and moves right to left and up the rows so 
@@ -494,48 +530,5 @@ void Minesweeper::printBoard (){
 		}
 		cout << endl;
 	}
-	return;
-}
-/*******************************************************************
-** Function: saveGame
-** Description: Saves hidden and available board data to an external 
-**	text file, allows user to return to a game after closing the 
-**	application.
-*******************************************************************/
-void Minesweeper::saveGame(clock_t start){
-	//variables
-	fstream sveGme;
-
-	//end timer and calculate time
-	clock_t end = clock();
-	clock_t ticks = end - start;
-	float dur = ticks / (float) CLOCKS_PER_SEC;
-
-	//open file and remove any existing contents
-	sveGme.open ("saved.txt", fstream::out, fstream::trunc);
-	//confirm that file has opened properly
-	if (!sveGme.is_open()){
-		cout << "Error loading save game file. Gameplay not saved." << endl;
-	}
-	//save board dimensions, the number of mines, total marked flags, and correctly marked flags
-	sveGme << x << " " << y << " " << numMines << " " << goodMrk << endl;
-	sveGme << dur << endl;
-	//save the board available to the user
-	for (int i = 0; i < x; i++){
-		for (int j = 0; j < y; j++){
-			sveGme << seeBoard[i*x + j] << " ";
-		}
-		sveGme << endl;
-	}
-	//save the hidden board
-	for (int k = 0; k < x; k++){
-		for (int l = 0; l < y; l++){
-			sveGme << priBoard[k*x + l] << " ";
-		}
-		sveGme << endl;
-	}
-	//close file
-	sveGme.close();
-	//return to gamePly (located in main.cpp)
 	return;
 }

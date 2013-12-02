@@ -28,6 +28,11 @@ public:
 	Minesweeper (const Minesweeper &obj);
 	~Minesweeper();
 //initialize functions called by main
+	int* getPri();
+	int* getPub();
+	int getDim();
+	int getNum();
+	int getMrk();
 	void setVis();
 	void setMines();
 	int getX(int);
@@ -36,7 +41,6 @@ public:
 	void flgORmrk();
 	void printBoard();
 	void contGame();
-	void saveGame(clock_t);
 };
 
 #endif
