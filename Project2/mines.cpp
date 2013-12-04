@@ -13,13 +13,14 @@ using namespace std;
 
 /*******************************************************************
 ** Function: Constructor for class Minesweeper
-** Description: Takes in values for x, y, and p and applies those to
-**	priBoard and seeBoard
+** Description: Takes in values for x, y, and numMines and applies 
+**	those to priBoard and seeBoard
 *******************************************************************/
 Minesweeper::Minesweeper(int a, int b, int m, int g, bool oFile){
 	x = a;
 	y = b;
-	p = m;
+	//sets the number of mines
+	numMines = (int)((x-1) * (y-1) * float(m)/100);
 	opFi = oFile;
 	goodMrk = g;
 	//one dimensional arrays initialized and treated as 2-D arrays
@@ -118,7 +119,7 @@ void Minesweeper::setVis(){
 void Minesweeper::visFile(){
 	//variables
 	fstream svGame;
-	float p;
+	float mov;
 	//open file and confirm open
 	svGame.open ("saved.txt", fstream::in | fstream::out);
 	if (!svGame.is_open()){
@@ -126,7 +127,7 @@ void Minesweeper::visFile(){
 		exit(EXIT_FAILURE);
 	}
 	//move cursor past first five data points
-	svGame >> p >> p >> p >> p >> p;
+	svGame >> mov >> mov >> mov >> mov >> mov;
 	//copy appropriate file data to seeBoard
 	for (int i = 0; i < x; i++){
 		for (int j = 0; j < y; j++){
@@ -163,8 +164,6 @@ void Minesweeper::setMines (){
 				priBoard[i*x + j] = 0;
 			}
 		}
-		//sets the number of mines based on p
-		numMines = (int)((x-1) * (y-1) * float(p)/100);
 		//the random number seed is used to put mines on the board (this loop will not run if numMines = 0)
 		for ( int w = 0; w < numMines; w++ ){
 			//x and y coordinates each chosen randomly and applied to board
@@ -173,7 +172,7 @@ void Minesweeper::setMines (){
 			/* if the random coordinate has already been used or if the coordinate is the same as the **
 			** first one chosen by the user, the counter is decremented and the function tries again. */
 			if ((rX == b && rY == a) || priBoard[rX*x + rY] == 9) 
-				--a;
+				--w;
 			else priBoard[rX*x + rY] = 9;
 		}
 		//check that there are actually mines on the board
@@ -227,7 +226,7 @@ int Minesweeper::getX(int when){
 		cout << "x: ";
 		cin >> a;
 		if (when == 1){
-			if ( a <= 0 || a > x-1){
+			if ( a <= 0 || a >= x){
 				cout << "Invalid input. " << endl;
 				input = false;
 			}
@@ -235,7 +234,7 @@ int Minesweeper::getX(int when){
 				input = true;
 		}
 		else if (when != 1){
-			if ( a < -2 || a > x-1){
+			if ( a < -2 || a >= x){
 				cout << "Invalid input. " << endl;
 				input = false;
 			}
@@ -255,7 +254,7 @@ int Minesweeper::getY(){
 	do{
 		cout << "y: ";
 		cin >> b;
-		if ( b <= 0 || b > y-1){
+		if ( b <= 0 || b >= y){
 			cout << "Invalid input. " << endl;
 			input = false;
 		}
@@ -341,33 +340,33 @@ int Minesweeper::upBoard (int a, int b){
 	** noted below*/
 
 	if (seeBoard[a*x + b] == 0){
-		for (int k = a; k < x; k++){
-			for (int l = b; l < y; l++){
+		for (int k = 1; k < x; k++){
+			for (int l = 1; l < y; l++){
 				if (seeBoard[k*x + l] == 0){
-					if (k < 10 && l < 10)	seeBoard [(k+1)*x + (l+1)] = priBoard [(k+1)*x + (l+1)];		//1
-					if (k < 10)				seeBoard [(k+1)*x + l] = priBoard [(k+1)*x + l];				//2
-					if (l < 10)				seeBoard [k*x + (l+1)] = priBoard [k*x + (l+1)];				//3
-					if (l > 1 && k < 10)	seeBoard [(k+1)*x + (l-1)] = priBoard [(k+1)*x + (l-1)];		//4
-					if (k > 1 && l < 10)	seeBoard [(k-1)*x + (l+1)] = priBoard [(k-1)*x + (l+1)];		//5
-					if (k > 1 && l > 1)		seeBoard [(k-1)*x + (l-1)] = priBoard [(k-1)*x + (l-1)];		//6
-					if (k > 1)				seeBoard [(k-1)*x + l] = priBoard [(k-1)*x + l];				//7
-					if (l > 1)				seeBoard [k*x + (l-1)] = priBoard [k*x + (l-1)];				//8
-					else					seeBoard [k*x + l] = priBoard [k*x + l];
+					if (k < x-1 && l < x-1)		seeBoard [(k+1)*x + (l+1)] = priBoard [(k+1)*x + (l+1)];		//1
+					if (k < x-1)				seeBoard [(k+1)*x + l] = priBoard [(k+1)*x + l];				//2
+					if (l < x-1)				seeBoard [k*x + (l+1)] = priBoard [k*x + (l+1)];				//3
+					if (l > 1 && k < x-1)		seeBoard [(k+1)*x + (l-1)] = priBoard [(k+1)*x + (l-1)];		//4
+					if (k > 1 && l < x-1)		seeBoard [(k-1)*x + (l+1)] = priBoard [(k-1)*x + (l+1)];		//5
+					if (k > 1 && l > 1)			seeBoard [(k-1)*x + (l-1)] = priBoard [(k-1)*x + (l-1)];		//6
+					if (k > 1)					seeBoard [(k-1)*x + l] = priBoard [(k-1)*x + l];				//7
+					if (l > 1)					seeBoard [k*x + (l-1)] = priBoard [k*x + (l-1)];				//8
+					else						seeBoard [k*x + l] = priBoard [k*x + l];
 				}
 			}
 		}
-		for (int m = a; m > 0; m--){
-			for (int n = b; n > 0; n--){
+		for (int m = x-1; m > 0; m--){
+			for (int n = y-1; n > 0; n--){
 				if (seeBoard[m*x + n] == 0){
-					if (m < 10 && n < 10)	seeBoard [(m+1)*x + (n+1)] = priBoard [(m+1)*x + (n+1)];		//1
-					if (m < 10)				seeBoard [(m+1)*x + n] = priBoard [(m+1)*x + n];				//2
-					if (n < 10)				seeBoard [m*x + (n+1)] = priBoard [m*x + (n+1)];				//3
-					if (n > 1 && m < 10)	seeBoard [(m+1)*x + (n-1)] = priBoard [(m+1)*x + (n-1)];		//4
-					if (m > 1 && n < 10)	seeBoard [(m-1)*x + (n+1)] = priBoard [(m-1)*x + (n+1)];		//5
-					if (m > 1 && n > 1)		seeBoard [(m-1)*x + (n-1)] = priBoard [(m-1)*x + (n-1)];		//6
-					if (m > 1)				seeBoard [(m-1)*x + n] = priBoard [(m-1)*x + n];				//7
-					if (n > 1)				seeBoard [m*x + (n-1)] = priBoard [m*x + (n-1)];				//8
-					else					seeBoard [m*x + n] = priBoard [m*x + n];
+					if (m < x-1 && n < x-1)		seeBoard [(m+1)*x + (n+1)] = priBoard [(m+1)*x + (n+1)];		//1
+					if (m < x-1)				seeBoard [(m+1)*x + n] = priBoard [(m+1)*x + n];				//2
+					if (n < x-1)				seeBoard [m*x + (n+1)] = priBoard [m*x + (n+1)];				//3
+					if (n > 1 && m < x-1)		seeBoard [(m+1)*x + (n-1)] = priBoard [(m+1)*x + (n-1)];		//4
+					if (m > 1 && n < x-1)		seeBoard [(m-1)*x + (n+1)] = priBoard [(m-1)*x + (n+1)];		//5
+					if (m > 1 && n > 1)			seeBoard [(m-1)*x + (n-1)] = priBoard [(m-1)*x + (n-1)];		//6
+					if (m > 1)					seeBoard [(m-1)*x + n] = priBoard [(m-1)*x + n];				//7
+					if (n > 1)					seeBoard [m*x + (n-1)] = priBoard [m*x + (n-1)];				//8
+					else						seeBoard [m*x + n] = priBoard [m*x + n];
 				}
 			}
 		}

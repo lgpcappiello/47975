@@ -19,6 +19,8 @@ SavedData::SavedData(){
 SavedData::SavedData(const SavedData &obj){
 	info = new float[SIZE];
 	*info = *obj.info;
+	start = obj.start;
+	save = obj.save;
 }
 /*******************************************************************
 ** Function: Destructor for class SavedData
@@ -85,10 +87,10 @@ float* SavedData::openSv(){
 	//if the file has data in it
 	do{
 		if (emt != 0){
-			save = true;
 			cout << "Would you like to continue your last saved game?" << "\nPlease enter 'yes' or 'no'." << endl;
 			cin >> saved;
 			if (saved[0] == 'y' || saved[0] == 'Y'){
+				save = true;
 				info = getSave();
 			}
 			else if (saved[0] == 'n' || saved[0] == 'N'){
@@ -231,7 +233,7 @@ float SavedData::endClck(){
 	//end timer
 	clock_t end = clock();
 	//calculate total time
-	clock_t ticks = end - start;
+	int ticks = end - start;
 	//convert to seconds
 	if (save == true) 
 		duration = (ticks / (float) CLOCKS_PER_SEC) + *(info + 4);
@@ -239,4 +241,18 @@ float SavedData::endClck(){
 		duration = ticks / (float) CLOCKS_PER_SEC;
 	//send data to high score function and return
 	return duration;
+}
+/*******************************************************************
+** Function: endClck
+** Description: Stops clock time and returns uesr time data
+*******************************************************************/
+float SavedData::getTime(){
+	float time;
+	clock_t check = clock();
+	float current = (float)check - (float)start;
+	if (save == true) 
+		time = (current / (float) CLOCKS_PER_SEC) + *(info + 4);
+	else 
+		time = current / (float) CLOCKS_PER_SEC;
+	return time;
 }

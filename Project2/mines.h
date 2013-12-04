@@ -6,7 +6,6 @@ class Minesweeper {
 //initialize private variables and functions called only by member functions
 private:
 	int x, y;
-	int p;
 	int numMines; 
 	int goodMrk;
 	bool opFi;
@@ -28,6 +27,7 @@ public:
 	Minesweeper (const Minesweeper &obj);
 	~Minesweeper();
 //initialize functions called by main
+	void setNumM(int, bool);
 	int* getPri();
 	int* getPub();
 	int getDim();

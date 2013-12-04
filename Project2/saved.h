@@ -22,5 +22,6 @@ public:
 	void getHiSc();
 	void begClck();
 	float endClck();
+	float getTime();
 };
 #endif
