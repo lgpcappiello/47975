@@ -6,6 +6,7 @@
 ** Description: This program mimics the classic version of the 
 **	puzzle game, Minesweeper. Users use number clues to look for
 **	all of the mines hidden throughout the board.
+** Total lines of code: 1067
 *******************************************************************/
 
 //System libraries
@@ -43,6 +44,7 @@ int main(){
 		v = *(info + 1)-1;
 		m = *(info + 2);
 		g = *(info + 3);
+		if (h == 10 && v == 10 && m == 12) data.setStatus(true);
 		gamePly(h, v, m, g, true, data);
 	}
 
@@ -65,6 +67,7 @@ int main(){
 				h = 10;
 				v = 10;
 				m = 12;
+				data.setStatus(true);
 				cout << "There are 12 mines on the board. Try to find them all! " << endl;
 			}
 			//customize board
@@ -130,6 +133,7 @@ void gamePly(int h, int v, int m, int g, bool oFile, SavedData data){
 	while (q == 0) {
 		//print the public board (board available to the user throughout gameplay)
 		defBoard.printBoard();
+		cout << "Time: " << data.getTime() << "s " << endl;
 		cout << "Pick a coordinate to check for a mine" << endl
 			<< "enter 0 to (un)flag or (un)mark a potential mine " << endl
 			<< "enter -1 to quit and save your game," << endl

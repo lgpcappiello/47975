@@ -12,6 +12,7 @@ using namespace std;
 SavedData::SavedData(){
 	info = new float[SIZE];
 	save = false;
+	willSave = false;
 }
 /*******************************************************************
 ** Function: Copy Constructor for class SavedData
@@ -21,12 +22,22 @@ SavedData::SavedData(const SavedData &obj){
 	*info = *obj.info;
 	start = obj.start;
 	save = obj.save;
+	willSave = obj.willSave;
 }
 /*******************************************************************
 ** Function: Destructor for class SavedData
 *******************************************************************/
 SavedData::~SavedData(){
 	delete []info;
+}
+/*******************************************************************
+** Function: Tells the program that this game data will be available
+**	for high scores (when default board is used). This function only 
+**	runs when the default is used.
+*******************************************************************/
+void SavedData::setStatus(bool sv){
+	willSave = sv;
+	return;
 }
 /*******************************************************************
 ** Function: saveGame

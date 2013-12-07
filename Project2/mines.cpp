@@ -343,30 +343,48 @@ int Minesweeper::upBoard (int a, int b){
 		for (int k = 1; k < x; k++){
 			for (int l = 1; l < y; l++){
 				if (seeBoard[k*x + l] == 0){
-					if (k < x-1 && l < x-1)		seeBoard [(k+1)*x + (l+1)] = priBoard [(k+1)*x + (l+1)];		//1
-					if (k < x-1)				seeBoard [(k+1)*x + l] = priBoard [(k+1)*x + l];				//2
-					if (l < x-1)				seeBoard [k*x + (l+1)] = priBoard [k*x + (l+1)];				//3
-					if (l > 1 && k < x-1)		seeBoard [(k+1)*x + (l-1)] = priBoard [(k+1)*x + (l-1)];		//4
-					if (k > 1 && l < x-1)		seeBoard [(k-1)*x + (l+1)] = priBoard [(k-1)*x + (l+1)];		//5
-					if (k > 1 && l > 1)			seeBoard [(k-1)*x + (l-1)] = priBoard [(k-1)*x + (l-1)];		//6
-					if (k > 1)					seeBoard [(k-1)*x + l] = priBoard [(k-1)*x + l];				//7
-					if (l > 1)					seeBoard [k*x + (l-1)] = priBoard [k*x + (l-1)];				//8
-					else						seeBoard [k*x + l] = priBoard [k*x + l];
+					if (k < x-1 && l < x-1)
+						seeBoard [(k+1)*x + (l+1)] = priBoard [(k+1)*x + (l+1)];		//1
+					if (k < x-1)
+						seeBoard [(k+1)*x + l] = priBoard [(k+1)*x + l];				//2
+					if (l < x-1)
+						seeBoard [k*x + (l+1)] = priBoard [k*x + (l+1)];				//3
+					if (l > 1 && k < x-1)
+						seeBoard [(k+1)*x + (l-1)] = priBoard [(k+1)*x + (l-1)];		//4
+					if (k > 1 && l < x-1)
+						seeBoard [(k-1)*x + (l+1)] = priBoard [(k-1)*x + (l+1)];		//5
+					if (k > 1 && l > 1)	
+						seeBoard [(k-1)*x + (l-1)] = priBoard [(k-1)*x + (l-1)];		//6
+					if (k > 1)	
+						seeBoard [(k-1)*x + l] = priBoard [(k-1)*x + l];				//7
+					if (l > 1)					
+						seeBoard [k*x + (l-1)] = priBoard [k*x + (l-1)];				//8
+					else						
+						seeBoard [k*x + l] = priBoard [k*x + l];
 				}
 			}
 		}
 		for (int m = x-1; m > 0; m--){
 			for (int n = y-1; n > 0; n--){
 				if (seeBoard[m*x + n] == 0){
-					if (m < x-1 && n < x-1)		seeBoard [(m+1)*x + (n+1)] = priBoard [(m+1)*x + (n+1)];		//1
-					if (m < x-1)				seeBoard [(m+1)*x + n] = priBoard [(m+1)*x + n];				//2
-					if (n < x-1)				seeBoard [m*x + (n+1)] = priBoard [m*x + (n+1)];				//3
-					if (n > 1 && m < x-1)		seeBoard [(m+1)*x + (n-1)] = priBoard [(m+1)*x + (n-1)];		//4
-					if (m > 1 && n < x-1)		seeBoard [(m-1)*x + (n+1)] = priBoard [(m-1)*x + (n+1)];		//5
-					if (m > 1 && n > 1)			seeBoard [(m-1)*x + (n-1)] = priBoard [(m-1)*x + (n-1)];		//6
-					if (m > 1)					seeBoard [(m-1)*x + n] = priBoard [(m-1)*x + n];				//7
-					if (n > 1)					seeBoard [m*x + (n-1)] = priBoard [m*x + (n-1)];				//8
-					else						seeBoard [m*x + n] = priBoard [m*x + n];
+					if (m < x-1 && n < x-1)		
+						seeBoard [(m+1)*x + (n+1)] = priBoard [(m+1)*x + (n+1)];		//1
+					if (m < x-1)				
+						seeBoard [(m+1)*x + n] = priBoard [(m+1)*x + n];				//2
+					if (n < x-1)				
+						seeBoard [m*x + (n+1)] = priBoard [m*x + (n+1)];				//3
+					if (n > 1 && m < x-1)		
+						seeBoard [(m+1)*x + (n-1)] = priBoard [(m+1)*x + (n-1)];		//4
+					if (m > 1 && n < x-1)		
+						seeBoard [(m-1)*x + (n+1)] = priBoard [(m-1)*x + (n+1)];		//5
+					if (m > 1 && n > 1)			
+						seeBoard [(m-1)*x + (n-1)] = priBoard [(m-1)*x + (n-1)];		//6
+					if (m > 1)					
+						seeBoard [(m-1)*x + n] = priBoard [(m-1)*x + n];				//7
+					if (n > 1)					
+						seeBoard [m*x + (n-1)] = priBoard [m*x + (n-1)];				//8
+					else						
+						seeBoard [m*x + n] = priBoard [m*x + n];
 				}
 			}
 		}
@@ -474,9 +492,8 @@ void Minesweeper::markMin(int a, int b){
 *******************************************************************/
 void Minesweeper::remMark(int a, int b){
 	//confirm that there is actually a mark at the given coordinate
-	if (seeBoard[a*x+b] == 42){
+	if (seeBoard[a*x+b] == 42)
 		seeBoard[a*x+b] = -1;		//-1 represents untouched coordinate
-	}
 	else
 		cout << "Invalid input: this space does not contain a flag." << endl;
 	return;
@@ -488,9 +505,8 @@ void Minesweeper::remMark(int a, int b){
 void Minesweeper::flagMin(int a, int b){
 	int gamSt = 0;
 	//Check that space hasn't already been touched by user
-	if (seeBoard[a*x+b] == -1 || seeBoard[a*x+b] == 42){
+	if (seeBoard[a*x+b] == -1 || seeBoard[a*x+b] == 42)
 		seeBoard[a*x+b] = 13;		//13 represents a flag
-	}
 	else
 		cout << "Invalid input: space not available." << endl;
 	return;
@@ -501,9 +517,8 @@ void Minesweeper::flagMin(int a, int b){
 *******************************************************************/
 void Minesweeper::remFlag(int a, int b){
 	//confirm that there is actually a flag at the given coordinate
-	if (seeBoard[a*x+b] == 13){
+	if (seeBoard[a*x+b] == 13)
 		seeBoard[a*x+b] = -1;		//-1 represents untouched coordinate
-	}
 	else
 		cout << "Invalid input: this space does not contain a flag." << endl;
 	return;
@@ -514,18 +529,21 @@ void Minesweeper::remFlag(int a, int b){
 **	game. 
 *******************************************************************/
 void Minesweeper::printBoard (){
-
 	for (int t = 0; t < x; t++){
 		for (int w = 0; w < y; w++){
 			cout << setw(3);
 			//values not yet available to the user have been initialized to -1,
 			//but the user sees these spaces as '.'
-			if (seeBoard[t*x + w] == -1) cout << ".";
+			if (seeBoard[t*x + w] == -1) 
+				cout << ".";
 			//flagged mines are saved as 13, displayed as F
-			else if (seeBoard[t*x + w] == 13) cout << "F";
+			else if (seeBoard[t*x + w] == 13) 
+				cout << "F";
 			//marked mines are saved as 42, displayed as !
-			else if (seeBoard[t*x + w] == 42) cout << "!";
-			else cout << seeBoard[t*x + w];
+			else if (seeBoard[t*x + w] == 42) 
+				cout << "!";
+			else 
+				cout << seeBoard[t*x + w];
 		}
 		cout << endl;
 	}

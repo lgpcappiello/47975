@@ -9,6 +9,7 @@ private:
 	bool save;
 	clock_t start;
 	float *info;
+	bool willSave;
 //Create public functions
 public:
 	SavedData();
@@ -18,6 +19,7 @@ public:
 	clock_t getStart();
 	float* openSv();
 	float* getSave();
+	void setStatus(bool);
 	void setHiSc(float);
 	void getHiSc();
 	void begClck();
